@@ -277,9 +277,9 @@ export default function IrrigationPlanner() {
       </CardContent>
       <CardFooter className="border-t pt-4 flex justify-between text-sm text-gray-500">
         <div>Smart recommendations based on soil moisture, weather, and crop requirements</div>
-        <Button variant="link" size="sm" className="text-agri-blue" onClick={() => setIsNewScheduleOpen(true)}>
+        <Button variant="link" size="sm" className="text-agri-blue">
           <DropletIcon className="h-4 w-4 mr-1" />
-          Generate Optimal Schedule
+          Generate AI Schedule
         </Button>
       </CardFooter>
 

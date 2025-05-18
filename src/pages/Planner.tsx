@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import Navbar from "@/components/Navbar";
@@ -42,7 +41,7 @@ const generateScheduleWithGemini = async (farmData: any) => {
     
     Format it in a clear, concise way that's easy for farmers to follow.`;
 
-    const response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=" + GEMINI_API_KEY, {
+    const response = await fetch("https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=" + GEMINI_API_KEY, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -67,8 +66,13 @@ const generateScheduleWithGemini = async (farmData: any) => {
     });
 
     const data = await response.json();
-    if (data.candidates && data.candidates[0].content.parts && data.candidates[0].content.parts[0].text) {
+    console.log("Gemini API response:", data);
+    
+    if (data && data.candidates && data.candidates[0] && data.candidates[0].content && 
+        data.candidates[0].content.parts && data.candidates[0].content.parts[0].text) {
       return data.candidates[0].content.parts[0].text;
+    } else if (data && data.error) {
+      throw new Error(`Gemini API Error: ${data.error.message || JSON.stringify(data.error)}`);
     } else {
       throw new Error("Invalid response format from Gemini API");
     }
@@ -123,8 +127,11 @@ const Planner = () => {
         efficiency: wateringEfficiency[0]
       };
       
+      console.log("Generating schedule with data:", farmData);
+      
       // Generate schedule using Gemini
       const schedule = await generateScheduleWithGemini(farmData);
+      console.log("Generated schedule:", schedule);
       setGeneratedSchedule(schedule);
       
       // Show success toast
@@ -345,14 +352,7 @@ const Planner = () => {
                   </div>
                   
                   <div className="pt-4">
-                    <div className="flex flex-col md:flex-row gap-2 justify-between">
-                      <Button 
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setWaterConservationTips(!waterConservationTips)}
-                      >
-                        Water Conservation Tips
-                      </Button>
+                    <div className="flex justify-end">
                       <Button 
                         variant="outline"
                         size="sm"
@@ -381,26 +381,6 @@ const Planner = () => {
                   </div>
                 </div>
               </div>
-              
-              {waterConservationTips && (
-                <div className="mt-6 bg-green-50 rounded-lg p-4 border border-green-100 animate-fade-in">
-                  <div className="flex items-center gap-2 mb-3">
-                    <DropletIcon className="h-5 w-5 text-green-600" />
-                    <h3 className="font-medium text-green-700">Water Conservation Tips</h3>
-                  </div>
-                  <ul className="list-disc pl-5 space-y-1">
-                    {waterConservationTipsData.map((tip, index) => (
-                      <li key={index} className="text-sm text-green-700">{tip}</li>
-                    ))}
-                  </ul>
-                  <div className="flex items-center gap-1 mt-3 text-sm text-green-700">
-                    <Check className="h-4 w-4" />
-                    <span>
-                      Implementing these tips could save approximately {estimatedSavings}% of your water usage
-                    </span>
-                  </div>
-                </div>
-              )}
               
               <div className="mt-8 border-t pt-6">
                 <h3 className="font-medium mb-4">Recommendation Factors:</h3>
@@ -718,7 +698,13 @@ const Planner = () => {
             </div>
             
             <div className="border rounded-lg p-4 whitespace-pre-line">
-              {generatedSchedule}
+              {generatedSchedule ? (
+                generatedSchedule
+              ) : (
+                <div className="text-center py-4 text-gray-500">
+                  No schedule has been generated yet. Please try again.
+                </div>
+              )}
             </div>
           </div>
           
