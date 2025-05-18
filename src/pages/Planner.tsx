@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import Navbar from "@/components/Navbar";
@@ -8,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
-import { Calendar, Check, Cloud, CloudDrizzle, CloudRain, DropletIcon, Leaf, MapPin, ChevronRight } from "lucide-react";
+import { Calendar, Check, Cloud, CloudDrizzle, CloudRain, DropletIcon, Leaf, MapPin, ChevronRight, CloudSun, Info } from "lucide-react";
 import WeatherWidget from "@/components/WeatherWidget";
 import IrrigationPlanner from "@/components/IrrigationPlanner";
 import { Slider } from "@/components/ui/slider";
@@ -16,6 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import InfoTooltip from "@/components/InfoTooltip";
 
 const Planner = () => {
   const location = useLocation();
@@ -404,7 +404,7 @@ const Planner = () => {
                       <span className="text-sm font-medium">{wateringEfficiency}%</span>
                     </div>
                     <div className="flex items-center gap-1 text-sm text-gray-600 mt-2">
-                      <Info className="h-4 w-4" />
+                      <InfoTooltip content="Water efficiency is calculated based on irrigation method, soil type, and weather conditions." />
                       <span>Above industry average</span>
                     </div>
                   </div>
@@ -414,7 +414,7 @@ const Planner = () => {
           </Card>
         </div>
         
-        {/* New Feature: Smart Sensor Integration */}
+        {/* New Feature: Smart Sensor Network */}
         <div className="mb-8">
           <Card>
             <CardHeader>
@@ -532,7 +532,7 @@ const Planner = () => {
                           <CloudRain className="h-4 w-4 text-gray-500" />
                           <div>
                             <div className="text-sm font-medium">Rain Forecast</div>
-                            <div className="text-xs text-gray-500">Pause irrigation if rain >60%</div>
+                            <div className="text-xs text-gray-500">Pause irrigation if rain &gt;60%</div>
                           </div>
                         </div>
                         <div className="flex items-center">
