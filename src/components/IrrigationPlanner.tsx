@@ -165,6 +165,16 @@ export default function IrrigationPlanner() {
     setIsDeleteConfirmOpen(true);
   };
 
+  // Function to open the Generate Optimal Schedule dialog from the parent
+  const openGenerateScheduleDialog = () => {
+    // We need to communicate with the parent to open the dialog
+    // Emit a custom event to notify the parent component
+    const event = new CustomEvent('openGenerateScheduleDialog', {
+      detail: { farmName: selectedFarm !== "all" ? selectedFarm : "Main Field" }
+    });
+    document.dispatchEvent(event);
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -277,7 +287,7 @@ export default function IrrigationPlanner() {
       </CardContent>
       <CardFooter className="border-t pt-4 flex justify-between text-sm text-gray-500">
         <div>Smart recommendations based on soil moisture, weather, and crop requirements</div>
-        <Button variant="link" size="sm" className="text-agri-blue">
+        <Button variant="link" size="sm" className="text-agri-blue" onClick={openGenerateScheduleDialog}>
           <DropletIcon className="h-4 w-4 mr-1" />
           Generate AI Schedule
         </Button>
