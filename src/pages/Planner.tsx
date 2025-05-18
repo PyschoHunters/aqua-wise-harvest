@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import Navbar from "@/components/Navbar";
@@ -7,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
-import { Calendar, Check, Cloud, CloudDrizzle, CloudRain, DropletIcon, Leaf, MapPin, ChevronRight, CloudSun, Info } from "lucide-react";
+import { Calendar as CalendarIcon, Check, Cloud, CloudDrizzle, CloudRain, DropletIcon, Leaf, MapPin, ChevronRight, CloudSun, Info } from "lucide-react";
 import WeatherWidget from "@/components/WeatherWidget";
 import IrrigationPlanner from "@/components/IrrigationPlanner";
 import { Slider } from "@/components/ui/slider";
@@ -16,6 +17,66 @@ import { toast } from "sonner";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import InfoTooltip from "@/components/InfoTooltip";
+import WaterUsageChart from "@/components/WaterUsageChart";
+
+// Gemini API Key
+const GEMINI_API_KEY = "AIzaSyBGG3uqzRVp0dE7RLiqevpAxAyImdf6EqU";
+
+// Helper function to generate schedule recommendations using Gemini
+const generateScheduleWithGemini = async (farmData: any) => {
+  try {
+    const prompt = `Generate a detailed irrigation schedule recommendation for a farm with the following details:
+    Farm: ${farmData.farm}
+    Crop Type: ${farmData.crop}
+    Soil Type: ${farmData.soil}
+    Current Soil Moisture: ${farmData.moisture}%
+    Irrigation Method: ${farmData.method}
+    Water Efficiency: ${farmData.efficiency}%
+    
+    Provide specific recommendations including:
+    1. Optimal watering days and times
+    2. Water amount recommendations (in inches)
+    3. Adjustments based on weather forecast
+    4. Water conservation tips specific to this crop and soil combination
+    5. Expected benefits of following this schedule
+    
+    Format it in a clear, concise way that's easy for farmers to follow.`;
+
+    const response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=" + GEMINI_API_KEY, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        contents: [
+          {
+            parts: [
+              {
+                text: prompt
+              }
+            ]
+          }
+        ],
+        generationConfig: {
+          temperature: 0.7,
+          topK: 40,
+          topP: 0.95,
+          maxOutputTokens: 1024,
+        }
+      })
+    });
+
+    const data = await response.json();
+    if (data.candidates && data.candidates[0].content.parts && data.candidates[0].content.parts[0].text) {
+      return data.candidates[0].content.parts[0].text;
+    } else {
+      throw new Error("Invalid response format from Gemini API");
+    }
+  } catch (error) {
+    console.error("Error generating schedule with Gemini:", error);
+    throw error;
+  }
+};
 
 const Planner = () => {
   const location = useLocation();
@@ -29,6 +90,9 @@ const Planner = () => {
   const [soilAnalysisDialog, setSoilAnalysisDialog] = useState(false);
   const [estimatedSavings, setEstimatedSavings] = useState<string>("0");
   const [aiAdviceOpen, setAiAdviceOpen] = useState(false);
+  const [isGeneratingSchedule, setIsGeneratingSchedule] = useState(false);
+  const [scheduleDialog, setScheduleDialog] = useState(false);
+  const [generatedSchedule, setGeneratedSchedule] = useState<string>("");
   
   // Effect to set the selected farm if passed via navigation state
   useEffect(() => {
@@ -40,15 +104,44 @@ const Planner = () => {
     }
   }, [location.state]);
 
-  const handleGenerateSchedule = () => {
+  const handleGenerateSchedule = async () => {
     if (!selectedFarm || !selectedCrop || !soilType || !irrigationMethod) {
       toast.error("Please fill in all required fields");
       return;
     }
     
-    toast.success("Optimal irrigation schedule generated", {
-      description: "Your irrigation plan has been created based on crop needs and weather forecast."
-    });
+    setIsGeneratingSchedule(true);
+    
+    try {
+      // Gather data to send to Gemini
+      const farmData = {
+        farm: selectedFarm,
+        crop: selectedCrop,
+        soil: soilType,
+        moisture: soilMoisture,
+        method: irrigationMethod,
+        efficiency: wateringEfficiency[0]
+      };
+      
+      // Generate schedule using Gemini
+      const schedule = await generateScheduleWithGemini(farmData);
+      setGeneratedSchedule(schedule);
+      
+      // Show success toast
+      toast.success("Optimal irrigation schedule generated", {
+        description: "Your irrigation plan has been created based on crop needs and weather forecast."
+      });
+      
+      // Open the dialog to show the schedule
+      setScheduleDialog(true);
+    } catch (error) {
+      console.error("Error generating schedule:", error);
+      toast.error("Failed to generate schedule", {
+        description: "Please try again later or adjust your settings."
+      });
+    } finally {
+      setIsGeneratingSchedule(false);
+    }
   };
   
   const openSoilAnalysis = () => {
@@ -273,8 +366,17 @@ const Planner = () => {
                     <Button 
                       className="w-full mt-3"
                       onClick={handleGenerateSchedule}
+                      disabled={isGeneratingSchedule}
                     >
-                      Generate Optimal Schedule
+                      {isGeneratingSchedule ? (
+                        <span className="flex items-center gap-2">
+                          <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                          Generating...
+                        </span>
+                      ) : "Generate Optimal Schedule"}
                     </Button>
                   </div>
                 </div>
@@ -329,92 +431,12 @@ const Planner = () => {
           </Card>
         </div>
         
-        {/* New Feature: Water Usage Analytics */}
+        {/* Water Usage Analytics */}
         <div className="mb-8">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-xl font-bold">Water Usage Analytics</CardTitle>
-              <CardDescription>
-                Track and analyze your water consumption patterns
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-2">
-                  <div className="h-60 border rounded-md flex items-center justify-center bg-blue-50 relative">
-                    <div className="absolute inset-0 p-6">
-                      <div className="w-full h-full bg-white rounded-md flex items-center justify-center">
-                        <div className="w-full h-full flex flex-col">
-                          <div className="flex justify-between px-4 py-2">
-                            <div className="text-sm font-medium">Water Usage This Month</div>
-                            <div className="flex gap-2">
-                              {["Daily", "Weekly", "Monthly"].map((period) => (
-                                <Badge key={period} variant={period === "Weekly" ? "default" : "outline"} className="text-xs">
-                                  {period}
-                                </Badge>
-                              ))}
-                            </div>
-                          </div>
-                          <div className="flex-1 h-full p-4">
-                            {/* Placeholder for chart */}
-                            <div className="relative w-full h-full">
-                              <div className="absolute bottom-0 left-0 right-0 bg-blue-500/10 h-3/6"></div>
-                              <div className="absolute bottom-0 left-[10%] right-[70%] bg-blue-500/20 h-4/6"></div>
-                              <div className="absolute bottom-0 left-[30%] right-[50%] bg-blue-500/30 h-5/6"></div>
-                              <div className="absolute bottom-0 left-[50%] right-[30%] bg-blue-500/20 h-1/2"></div>
-                              <div className="absolute bottom-0 left-[70%] right-[10%] bg-blue-500/10 h-3/6"></div>
-                              <div className="absolute bottom-0 left-0 right-0 border-t border-dashed border-gray-300"></div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="text-center">
-                      <p className="text-lg font-medium">Water Usage Analytics</p>
-                      <p className="text-sm text-gray-500">Track and compare water consumption over time</p>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="space-y-4">
-                  <div className="bg-white rounded-lg p-4 border">
-                    <div className="text-sm text-gray-500 mb-1">This Month</div>
-                    <div className="text-2xl font-bold">1,245 gal</div>
-                    <div className="flex items-center gap-1 text-sm text-green-600">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-arrow-down-right"><path d="m7 7 10 10"/><path d="M17 7v10H7"/></svg>
-                      <span>12% less than last month</span>
-                    </div>
-                  </div>
-                  
-                  <div className="bg-white rounded-lg p-4 border">
-                    <div className="text-sm text-gray-500 mb-1">Water Savings</div>
-                    <div className="text-2xl font-bold">{estimatedSavings}%</div>
-                    <div className="flex items-center gap-1 text-sm text-gray-600">
-                      <Check className="h-4 w-4" />
-                      <span>Based on optimal scheduling</span>
-                    </div>
-                  </div>
-                  
-                  <div className="bg-white rounded-lg p-4 border">
-                    <div className="text-sm text-gray-500 mb-1">Water Efficiency</div>
-                    <div className="flex items-center gap-1">
-                      <div className="w-full bg-gray-200 rounded-full h-2.5">
-                        <div className="bg-blue-600 h-2.5 rounded-full" style={{ width: `${wateringEfficiency}%` }}></div>
-                      </div>
-                      <span className="text-sm font-medium">{wateringEfficiency}%</span>
-                    </div>
-                    <div className="flex items-center gap-1 text-sm text-gray-600 mt-2">
-                      <InfoTooltip content="Water efficiency is calculated based on irrigation method, soil type, and weather conditions." />
-                      <span>Above industry average</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <WaterUsageChart />
         </div>
         
-        {/* New Feature: Smart Sensor Network */}
+        {/* Smart Sensor Network */}
         <div className="mb-8">
           <Card>
             <CardHeader>
@@ -668,6 +690,41 @@ const Planner = () => {
           <DialogFooter className="flex-col sm:flex-row gap-2">
             <Button variant="outline" onClick={() => setAiAdviceOpen(false)}>Close</Button>
             <Button>Apply Recommendations</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Generated Schedule Dialog */}
+      <Dialog open={scheduleDialog} onOpenChange={setScheduleDialog}>
+        <DialogContent className="sm:max-w-[700px] max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <CalendarIcon className="h-5 w-5 text-agri-blue" />
+              Optimal Irrigation Schedule
+            </DialogTitle>
+            <DialogDescription>
+              AI-generated irrigation plan for {selectedFarm || "your farm"}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="py-4">
+            <div className="bg-blue-50 p-4 rounded-md mb-4">
+              <div className="flex items-center gap-2">
+                <Info className="h-4 w-4 text-blue-600" />
+                <p className="text-sm text-blue-700">
+                  This irrigation schedule has been optimized for {selectedCrop} grown in {soilType} soil using {irrigationMethod} irrigation method.
+                </p>
+              </div>
+            </div>
+            
+            <div className="border rounded-lg p-4 whitespace-pre-line">
+              {generatedSchedule}
+            </div>
+          </div>
+          
+          <DialogFooter className="flex-col sm:flex-row gap-2">
+            <Button variant="outline" onClick={() => setScheduleDialog(false)}>Close</Button>
+            <Button>Save Schedule</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

@@ -18,7 +18,7 @@ const cropData = [
     daysToMaturity: "90-120 days",
     wateringFrequency: "Regular",
     wateringAmount: "1-2 inches per week",
-    image: "https://images.unsplash.com/photo-1601593768799-76ac155b929a?q=80&w=500&auto=format&fit=crop",
+    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQI8mJaexq94edtBCwP3x2lLNwgsAG41uOXwA&s",
     description: "Corn is a major cereal crop that thrives in warm weather. It has high water requirements, especially during the silking and tasseling stages. Adequate irrigation during these critical growth periods significantly impacts yield.",
     bestPractices: [
       "Irrigate more frequently during silking and tasseling stages",
@@ -36,7 +36,7 @@ const cropData = [
     daysToMaturity: "110-130 days",
     wateringFrequency: "Moderate",
     wateringAmount: "0.8-1.5 inches per week",
-    image: "https://images.unsplash.com/photo-1467144364918-6a46f9f4e552?q=80&w=500&auto=format&fit=crop",
+    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ7REXsyj60ncyBD6klVrILC8Og9VK9srvdyA&s",
     description: "Wheat is a resilient grain crop that can be grown as winter or spring wheat. It has moderate water needs but is sensitive to both drought and waterlogging. Wheat requires consistent moisture during tillering and grain filling stages.",
     bestPractices: [
       "Ensure adequate soil moisture at planting time",
@@ -54,7 +54,7 @@ const cropData = [
     daysToMaturity: "90-150 days",
     wateringFrequency: "Moderate",
     wateringAmount: "1-1.5 inches per week",
-    image: "https://images.unsplash.com/photo-1626953432052-3a2e6d8b4acc?q=80&w=500&auto=format&fit=crop",
+    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSGNRUuNzK8O62AJKJpcvNXfaaCEy3m5rGcGw&s",
     description: "Soybeans are legumes that fix nitrogen in the soil. They have moderate water requirements and are somewhat drought tolerant due to their deep root systems. However, water stress during flowering and pod development can significantly reduce yields.",
     bestPractices: [
       "Most critical water needs are during flowering and pod fill",
@@ -72,7 +72,7 @@ const cropData = [
     daysToMaturity: "70-90 days to first cutting",
     wateringFrequency: "Regular",
     wateringAmount: "1.5-2 inches per week",
-    image: "https://images.unsplash.com/photo-1626266180957-73cbe5c67bef?q=80&w=500&auto=format&fit=crop",
+    image: "https://cdn.britannica.com/18/182618-050-53ADCEF8/Alfalfa-forage-crop.jpg",
     description: "Alfalfa is a perennial legume with a deep root system that can access water up to 20 feet below the surface. Despite this, it has high water requirements due to its rapid growth and multiple harvests per season. Proper irrigation management is essential for optimal yields.",
     bestPractices: [
       "Schedule irrigation immediately after cutting",
@@ -81,6 +81,78 @@ const cropData = [
     ],
     idealConditions: "Well-drained soil with pH 6.8-7.5 and 30-40 inches of water annually"
   },
+  {
+    id: 5,
+    name: "Rice",
+    waterRequirement: "Very High",
+    growingSeason: "Late Spring-Fall",
+    soilType: "Clay or loam with poor drainage",
+    daysToMaturity: "120-180 days",
+    wateringFrequency: "Constant",
+    wateringAmount: "4-6 inches standing water",
+    image: "https://media.istockphoto.com/id/153737841/photo/rice.jpg?s=612x612&w=0&k=20&c=lfO7iLT0UsDDzra0uBOsN1rvr2d5OEtrG2uwbts33_c=",
+    description: "Rice is one of the most water-intensive crops, typically grown in flooded fields or paddies. It requires continuous flooding during most of its growing cycle, though some modern varieties can be grown with less water using alternate wetting and drying techniques.",
+    bestPractices: [
+      "Maintain 2-4 inches of standing water during vegetative and reproductive stages",
+      "Consider alternate wetting and drying techniques where appropriate",
+      "Drain field 2-3 weeks before harvest"
+    ],
+    idealConditions: "Hot and humid conditions with consistent water supply"
+  },
+  {
+    id: 6,
+    name: "Cotton",
+    waterRequirement: "Moderate to High",
+    growingSeason: "Late Spring-Fall",
+    soilType: "Loamy, well-drained",
+    daysToMaturity: "150-180 days",
+    wateringFrequency: "Regular",
+    wateringAmount: "1-2 inches per week",
+    image: "https://media.istockphoto.com/id/589121090/photo/branch-of-ripe-cotton.jpg?s=612x612&w=0&k=20&c=eGlf6UISNaZRIKxnoesMIIpOqzevDWtb_OoU_0KVN_M=",
+    description: "Cotton is a warm-season crop with moderate to high water requirements. It is relatively drought-tolerant once established but needs adequate moisture during flowering and boll development stages to ensure good yields.",
+    bestPractices: [
+      "Ensure adequate moisture during peak flowering and boll development",
+      "Use deficit irrigation during vegetative growth if necessary",
+      "Reduce irrigation as bolls mature and open"
+    ],
+    idealConditions: "Warm temperatures and 24-36 inches of water during growing season"
+  },
+  {
+    id: 7,
+    name: "Sugarcane",
+    waterRequirement: "High",
+    growingSeason: "Year-round (tropical)",
+    soilType: "Rich, well-drained loam",
+    daysToMaturity: "300-360 days",
+    wateringFrequency: "Regular",
+    wateringAmount: "1.5-2 inches per week",
+    image: "https://www.netafimindia.com/bynder/689FFBA0-D431-4D9A-8BFB1805602316FC-sugarcane-with-driperline.jpg?width=1200&height=630&rmode=Min",
+    description: "Sugarcane is a tropical grass that requires substantial water throughout its long growing cycle. It has one of the highest water requirements among commercial crops, though it can tolerate short periods of water stress.",
+    bestPractices: [
+      "Maintain consistent soil moisture throughout the growth cycle",
+      "Increase water during grand growth phase",
+      "Reduce irrigation during ripening to increase sugar content"
+    ],
+    idealConditions: "Tropical climate with 48-72 inches of water annually"
+  },
+  {
+    id: 8,
+    name: "Tomato",
+    waterRequirement: "Moderate",
+    growingSeason: "Late Spring-Summer",
+    soilType: "Well-drained, fertile loam",
+    daysToMaturity: "70-85 days",
+    wateringFrequency: "Regular",
+    wateringAmount: "1-1.5 inches per week",
+    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSJKRPXQYgZjJmuQTgXVQNLoZRxRWe7aW09wg&s",
+    description: "Tomatoes require consistent moisture for optimal growth and fruit development. Irregular watering can lead to issues like blossom end rot and fruit cracking. Drip irrigation is ideal for tomatoes to keep foliage dry and reduce disease risk.",
+    bestPractices: [
+      "Water deeply but infrequently to encourage deep root growth",
+      "Maintain consistent moisture during flowering and fruiting",
+      "Use mulch to conserve soil moisture and reduce evaporation"
+    ],
+    idealConditions: "Warm temperatures and consistent moisture with 20-25 inches of water during growing season"
+  }
 ];
 
 export default function CropDatabase() {

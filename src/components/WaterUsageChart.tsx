@@ -3,6 +3,12 @@ import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar } from 'recharts';
+import { 
+  ChartContainer, 
+  ChartTooltip, 
+  ChartTooltipContent,
+} from '@/components/ui/chart';
+import InfoTooltip from '@/components/InfoTooltip';
 
 // Sample data - in a real app, this would come from an API
 const dailyData = [
@@ -33,49 +39,36 @@ const monthlyData = [
 
 export default function WaterUsageChart() {
   const [chartType, setChartType] = useState<'area' | 'bar'>('area');
+  const [activeTab, setActiveTab] = useState('daily');
   
-  const renderChart = (data: any[]) => {
-    if (chartType === 'area') {
-      return (
-        <ResponsiveContainer width="100%" height={300}>
-          <AreaChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-            <defs>
-              <linearGradient id="colorActual" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#2196F3" stopOpacity={0.8}/>
-                <stop offset="95%" stopColor="#2196F3" stopOpacity={0.1}/>
-              </linearGradient>
-              <linearGradient id="colorRecommended" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#4CAF50" stopOpacity={0.8}/>
-                <stop offset="95%" stopColor="#4CAF50" stopOpacity={0.1}/>
-              </linearGradient>
-            </defs>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="date" />
-            <YAxis />
-            <Tooltip formatter={(value) => `${value} gal`} />
-            <Legend />
-            <Area type="monotone" dataKey="actual" stroke="#2196F3" fillOpacity={1} fill="url(#colorActual)" name="Actual Usage" />
-            <Area type="monotone" dataKey="recommended" stroke="#4CAF50" fillOpacity={1} fill="url(#colorRecommended)" name="Recommended Usage" />
-          </AreaChart>
-        </ResponsiveContainer>
-      );
-    } else {
-      return (
-        <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="date" />
-            <YAxis />
-            <Tooltip formatter={(value) => `${value} gal`} />
-            <Legend />
-            <Bar dataKey="actual" fill="#2196F3" name="Actual Usage" />
-            <Bar dataKey="recommended" fill="#4CAF50" name="Recommended Usage" />
-          </BarChart>
-        </ResponsiveContainer>
-      );
+  const getActiveData = () => {
+    switch(activeTab) {
+      case 'weekly':
+        return weeklyData;
+      case 'monthly':
+        return monthlyData;
+      default:
+        return dailyData;
     }
   };
-
+  
+  const config = {
+    actual: {
+      label: "Actual Usage",
+      theme: {
+        light: "#2196F3",
+        dark: "#2196F3",
+      },
+    },
+    recommended: {
+      label: "Recommended Usage",
+      theme: {
+        light: "#4CAF50",
+        dark: "#4CAF50",
+      },
+    },
+  };
+  
   return (
     <Card className="col-span-4">
       <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -106,25 +99,134 @@ export default function WaterUsageChart() {
           >
             Bar
           </button>
+          <div className="ml-2">
+            <InfoTooltip content="Toggle between area and bar chart visualization types to view your water usage data in different formats" />
+          </div>
         </div>
       </CardHeader>
       <CardContent>
-        <Tabs defaultValue="daily">
+        <Tabs defaultValue="daily" value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="mb-4">
             <TabsTrigger value="daily">Daily</TabsTrigger>
             <TabsTrigger value="weekly">Weekly</TabsTrigger>
             <TabsTrigger value="monthly">Monthly</TabsTrigger>
           </TabsList>
-          <TabsContent value="daily">
-            {renderChart(dailyData)}
+          <TabsContent value="daily" className="h-[300px]">
+            <ChartContainer config={config} className="h-full">
+              {chartType === 'area' ? (
+                <AreaChart data={dailyData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="date" />
+                  <YAxis />
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <Area
+                    type="monotone"
+                    dataKey="actual"
+                    name="actual"
+                    stroke="#2196F3"
+                    fill="#2196F3"
+                    fillOpacity={0.3}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="recommended"
+                    name="recommended"
+                    stroke="#4CAF50"
+                    fill="#4CAF50"
+                    fillOpacity={0.3}
+                  />
+                </AreaChart>
+              ) : (
+                <BarChart data={dailyData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="date" />
+                  <YAxis />
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <Bar dataKey="actual" name="actual" fill="#2196F3" />
+                  <Bar dataKey="recommended" name="recommended" fill="#4CAF50" />
+                </BarChart>
+              )}
+            </ChartContainer>
           </TabsContent>
-          <TabsContent value="weekly">
-            {renderChart(weeklyData)}
+          <TabsContent value="weekly" className="h-[300px]">
+            <ChartContainer config={config} className="h-full">
+              {chartType === 'area' ? (
+                <AreaChart data={weeklyData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="date" />
+                  <YAxis />
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <Area
+                    type="monotone"
+                    dataKey="actual"
+                    name="actual"
+                    stroke="#2196F3"
+                    fill="#2196F3"
+                    fillOpacity={0.3}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="recommended"
+                    name="recommended"
+                    stroke="#4CAF50"
+                    fill="#4CAF50"
+                    fillOpacity={0.3}
+                  />
+                </AreaChart>
+              ) : (
+                <BarChart data={weeklyData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="date" />
+                  <YAxis />
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <Bar dataKey="actual" name="actual" fill="#2196F3" />
+                  <Bar dataKey="recommended" name="recommended" fill="#4CAF50" />
+                </BarChart>
+              )}
+            </ChartContainer>
           </TabsContent>
-          <TabsContent value="monthly">
-            {renderChart(monthlyData)}
+          <TabsContent value="monthly" className="h-[300px]">
+            <ChartContainer config={config} className="h-full">
+              {chartType === 'area' ? (
+                <AreaChart data={monthlyData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="date" />
+                  <YAxis />
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <Area
+                    type="monotone"
+                    dataKey="actual"
+                    name="actual"
+                    stroke="#2196F3"
+                    fill="#2196F3"
+                    fillOpacity={0.3}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="recommended"
+                    name="recommended"
+                    stroke="#4CAF50"
+                    fill="#4CAF50"
+                    fillOpacity={0.3}
+                  />
+                </AreaChart>
+              ) : (
+                <BarChart data={monthlyData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="date" />
+                  <YAxis />
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <Bar dataKey="actual" name="actual" fill="#2196F3" />
+                  <Bar dataKey="recommended" name="recommended" fill="#4CAF50" />
+                </BarChart>
+              )}
+            </ChartContainer>
           </TabsContent>
         </Tabs>
+        <div className="mt-4 text-xs text-gray-500 flex justify-end items-center gap-2">
+          <span>Data last updated: Today at 12:00 PM</span>
+          <InfoTooltip content="This chart shows your actual water usage compared to recommended amounts based on crop needs and environmental factors" />
+        </div>
       </CardContent>
     </Card>
   );
